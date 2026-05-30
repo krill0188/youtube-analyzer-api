@@ -2,11 +2,11 @@ services:
   - type: web
     name: youtube-analyzer-api
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install fastapi uvicorn youtube-transcript-api yt-dlp pydantic python-dotenv
+    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: API_KEYS
         sync: false
-      - key: PORT
-        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.9
