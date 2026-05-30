@@ -3,10 +3,12 @@ YouTube Video Analyzer API
 FastAPI server — RapidAPI compatible
 """
 
+from __future__ import annotations
 import os
 import time
 import hashlib
 from collections import defaultdict
+from typing import Optional
 from fastapi import FastAPI, HTTPException, Header, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -27,7 +29,7 @@ RATE_LIMIT = {
     "basic": {"calls": 500,  "window": 86400},   # 500회/일
     "pro":   {"calls": 9999, "window": 86400},   # 무제한
 }
-_rate_store: dict[str, list[float]] = defaultdict(list)
+_rate_store: "dict[str, list[float]]" = defaultdict(list)
 
 def get_tier(api_key: str) -> str:
     """API 키 접두어로 티어 판별: free_ / basic_ / pro_"""
@@ -76,7 +78,7 @@ class AnalyzeResponse(BaseModel):
 
 
 # ── 미들웨어: 인증 ────────────────────────────────────────────
-def verify_api_key(x_rapidapi_key: str | None, x_api_key: str | None) -> str:
+def verify_api_key(x_rapidapi_key: Optional[str], x_api_key: Optional[str]) -> str:
     """RapidAPI 헤더 또는 직접 헤더 모두 허용"""
     key = x_rapidapi_key or x_api_key
     if not key:
@@ -100,8 +102,8 @@ def health():
 @app.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(
     body: AnalyzeRequest,
-    x_rapidapi_key: str | None = Header(default=None),
-    x_api_key: str | None = Header(default=None),
+    x_rapidapi_key: Optional[str] = Header(default=None),
+    x_api_key: Optional[str] = Header(default=None),
 ):
     api_key = verify_api_key(x_rapidapi_key, x_api_key)
     check_rate_limit(api_key)
